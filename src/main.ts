@@ -6,48 +6,52 @@ import { Player } from "./player";
 import { Lights } from "./lights";
 import { FBXLoader, GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
 import { Village } from "./village";
+import { lerpAngle } from "./utils";
 
 class App {
+  private $canvas = document.querySelector("canvas") as HTMLCanvasElement;
+
+  private gui = new GUI();
+  private clock = new THREE.Clock();
+
   private camera!: THREE.PerspectiveCamera;
-  private CAMERA_HEIGHT = 8;
-  private CAMERA_DISTANCE = 15;
-  private CAMERA_SMOOTHNESS = 0.01;
+
+  private CAMERA_HEIGHT = 3;
+  private CAMERA_DISTANCE = 6;
+  private CAMERA_FOLLOW_SPEED = 0.02;
+
   private cameraRotation = 0;
 
   private scene!: THREE.Scene;
   private renderer!: THREE.Renderer;
-  private $canvas = document.querySelector("canvas") as HTMLCanvasElement;
-  private controls!: OrbitControls;
 
   private loaders = new Map<string, THREE.Loader>();
 
-  private gui = new GUI();
+  // keyboard keys
+  private keys: { [key: string]: boolean } = {};
 
   private player!: Player;
 
-  private clock = new THREE.Clock();
-
-  private keys: { [key: string]: boolean } = {};
-
   private isRunning = false;
+  private lerpFactor = 0.1;
 
   async init() {
     this.initCamera();
     this.initScene();
-    // this.initControls();
     this.initLoaders();
     await physicsSystem.init(this.scene, this.gui);
-
     await this.initRenderer();
 
     new Lights(this.scene);
     new Ground(this.scene);
 
     this.player = new Player();
-    await this.player.init(this.scene, this.camera, this.loaders);
+    await this.player.init(this.scene, this.loaders);
     await new Village().init(this.scene, this.loaders);
+
     window.addEventListener("keydown", this.onKeyDown);
     window.addEventListener("keyup", this.onKeyUp);
+    window.addEventListener("blur", this.onBlur);
     window.addEventListener("resize", this.onReize);
   }
 
@@ -55,15 +59,6 @@ class App {
     const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 10, -15);
     this.camera = camera;
-  }
-
-  initControls() {
-    const controls = new OrbitControls(this.camera, this.$canvas || this.renderer.domElement);
-
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-
-    this.controls = controls;
   }
 
   async initRenderer() {
@@ -84,7 +79,6 @@ class App {
     renderer.setPixelRatio(window.devicePixelRatio > 2 ? 2 : window.devicePixelRatio);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.shadowMap.type = THREE.PCFShadowMap;
-    // renderer.setAnimationLoop(this.animate);
 
     const rendererGUI = this.gui.addFolder("Renderer");
     rendererGUI
@@ -119,25 +113,20 @@ class App {
       () => {
         this.renderer.setAnimationLoop(this.animate);
       },
-      (url, itemsLoaded, itemsTotal) => {
-        console.log(Math.floor((itemsLoaded / itemsTotal) * 100) + "% loaded");
-      },
+      (url, itemsLoaded, itemsTotal) => {},
       (url) => {
         console.log(`Error loading ${url}`);
       }
     );
     const fbxLoader = new FBXLoader(manager);
     this.loaders.set("fbx", fbxLoader);
-
     const gltfLoader = new GLTFLoader(manager);
     this.loaders.set("gltf", gltfLoader);
-    // Character_Male.fbx
   }
-
-  // ------------------- Event ----------------------
 
   onKeyDown = (e: KeyboardEvent) => {
     this.keys[e.key.toLowerCase()] = true;
+    console.log(e.key.toLowerCase());
     if (e.key === "Shift") this.keys["shift"] = true;
   };
 
@@ -146,52 +135,51 @@ class App {
     if (e.key === "Shift") this.keys["shift"] = false;
   };
 
+  onBlur = () => {
+    this.keys = {};
+    this.isRunning = false;
+  };
+
   onReize = () => {
     this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   };
 
-  // ------------------- Animation ------------------
   animate = () => {
     const delta = this.clock.getDelta();
-
-    const movement = {
-      x: 0,
-      z: 0,
-    };
+    const movement = { x: 0, z: 0 };
 
     physicsSystem.update();
 
-    if (this.keys["w"]) movement.z = -1;
-    if (this.keys["s"]) movement.z = +1;
-    if (this.keys["a"]) movement.x = -1;
-    if (this.keys["d"]) movement.x = 1;
-    if (this.keys["shift"]) this.isRunning = true;
-    else this.isRunning = false;
+    if (this.keys["w"] || this.keys["arrowup"]) movement.z = -1;
+    if (this.keys["s"] || this.keys["arrowdown"]) movement.z = 1;
+    if (this.keys["a"] || this.keys["arrowleft"]) movement.x = -1;
+    if (this.keys["d"] || this.keys["arrowright"]) movement.x = 1;
 
-    // this.controls?.update();
-
-    if (this.player) {
-      this.player.update(delta, movement, this.isRunning);
-      const playerPos = this.player.rigidBody.translation();
-      // const CharacterRotation = this.player.mesh.rotation.y;
-      // this.cameraRotation -= (CharacterRotation - this.cameraRotation) * this.CAMERA_SMOOTHNESS;
-      const targetX = playerPos.x + Math.sin(this.cameraRotation) * this.CAMERA_DISTANCE;
-      const targetZ = playerPos.z + Math.cos(this.cameraRotation) * this.CAMERA_DISTANCE;
-      const targetY = playerPos.y + this.CAMERA_HEIGHT;
-
-      const lerpFactor = 0.6;
-
-      this.camera.position.x += (targetX - this.camera.position.x) * lerpFactor;
-      this.camera.position.z += (targetZ - this.camera.position.z) * lerpFactor;
-
-      this.camera.position.y = targetY;
-
-      this.camera.lookAt(playerPos.x, playerPos.y + 1, playerPos.z);
-    }
+    this.keys["shift"] ? (this.isRunning = true) : (this.isRunning = false);
 
     this.renderer.render(this.scene, this.camera);
+
+    if (!this.player) return;
+
+    this.player.update(delta, movement, this.cameraRotation, this.isRunning);
+    const playerPos = this.player.rigidBody.translation();
+
+    if (movement.z < 0) {
+      const targetCameraRotation = this.player.rotationTarget + Math.PI;
+      this.cameraRotation = lerpAngle(this.cameraRotation, targetCameraRotation, this.CAMERA_FOLLOW_SPEED);
+    }
+
+    const targetX = playerPos.x + Math.sin(this.cameraRotation) * this.CAMERA_DISTANCE;
+    const targetZ = playerPos.z + Math.cos(this.cameraRotation) * this.CAMERA_DISTANCE;
+    const targetY = playerPos.y + this.CAMERA_HEIGHT;
+
+    this.camera.position.x += (targetX - this.camera.position.x) * this.lerpFactor;
+    this.camera.position.z += (targetZ - this.camera.position.z) * this.lerpFactor;
+    this.camera.position.y = targetY;
+
+    this.camera.lookAt(playerPos.x, playerPos.y + 1, playerPos.z);
   };
 }
 

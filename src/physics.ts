@@ -13,7 +13,10 @@ class PhysicsSystem {
 
     this.createDebugMesh();
 
-    gui.add(this.debugMode, "enable").name("Debug Mode");
+    gui
+      .add(this.debugMode, "enable")
+      .name("Debug Mode")
+      .onChange((v) => (this.mesh.visible = v));
 
     scene.add(this.mesh);
   }

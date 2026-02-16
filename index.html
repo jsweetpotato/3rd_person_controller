@@ -2,15 +2,83 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>three.rapier</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>3rd Person Controller</title>
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <div id="app">
-      <canvas></canvas>
-    </div>
+    <main id="app">
+      <nav>
+        <button id="open" aria-label="Open Info">Info</button>
+      </nav>
+
+      <dialog id="info-dialog" aria-labelledby="dialog-title">
+        <form method="dialog">
+          <header>
+            <h2>3rd Person Controller</h2>
+          </header>
+
+          <section>
+            <p>This is a 3rd person camera setup where you can control movement and rotation using the keyboard.</p>
+          </section>
+
+          <section>
+            <h3>Controls</h3>
+            <ul id="control-list">
+              <li>
+                <div class="key-group"><kbd>W</kbd> <kbd aria-label="Arrow up">↑</kbd></div>
+                Move Forward
+              </li>
+              <li>
+                <div class="key-group"><kbd>A</kbd> <kbd aria-label="Arrow left">←</kbd></div>
+                Turn Left
+              </li>
+              <li>
+                <div class="key-group"><kbd>S</kbd> <kbd aria-label="Arrow down">↓</kbd></div>
+                Move Backward
+              </li>
+              <li>
+                <div class="key-group"><kbd>D</kbd> <kbd aria-label="Arrow right">→</kbd></div>
+                Turn Right
+              </li>
+            </ul>
+          </section>
+
+          <section id="asset-section">
+            <h3>Assets & References</h3>
+
+            <h4>Models</h4>
+            <ul>
+              <li>
+                <a href="https://skfb.ly/oLFVo" target="_blank" rel="noopener noreferrer">Character Male</a>
+              </li>
+              <li>
+                <a href="https://skfb.ly/poKKv" target="_blank" rel="noopener noreferrer">Medieval Village</a>
+              </li>
+            </ul>
+
+            <h4>Reference</h4>
+            <ul>
+              <li>
+                <a href="https://github.com/wass08/r3f-3rd-person-controller-final" target="_blank" rel="noopener noreferrer">
+                  Wawa Sensei - 3rd person controller
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <footer>
+            <button type="submit" id="close" autofocus>Close</button>
+          </footer>
+        </form>
+      </dialog>
+
+      <canvas aria-label="Game View"></canvas>
+    </main>
+
     <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/dialog.ts"></script>
   </body>
 </html>
