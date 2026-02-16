@@ -181,7 +181,7 @@ class App {
     this.camera.position.z += (targetZ - this.camera.position.z) * this.lerpFactor;
     this.camera.position.y = targetY;
 
-    this.camera.lookAt(playerPos.x, playerPos.y + 1, playerPos.z);
+    this.camera.lookAt(playerPos.x, playerPos.y + 0.5, playerPos.z);
   };
 }
 
