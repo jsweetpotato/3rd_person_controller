@@ -1,12 +1,12 @@
 import * as THREE from "three";
-import RAPIER from "@dimforge/rapier3d-compat";
-import { physicsSystem } from "./physics";
+// import RAPIER from "@dimforge/rapier3d-compat";
+// import { physicsSystem } from "./physics";
 import type { GLTF } from "three/examples/jsm/Addons.js";
-import { getModelSize, getWorldTransform } from "./utils";
+// import { getModelSize, getWorldTransform } from "./utils";
 
 export class Village {
   private model: THREE.Group<THREE.Object3DEventMap> | null = null;
-  private world = physicsSystem.world;
+  // private world = physicsSystem.world;
   scene!: THREE.Scene;
 
   async init(scene: THREE.Scene, loaders: Map<string, THREE.Loader>) {

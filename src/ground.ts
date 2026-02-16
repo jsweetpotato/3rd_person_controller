@@ -5,9 +5,9 @@ import RAPIER from "@dimforge/rapier3d-compat";
 export class Ground {
   private world = physicsSystem.world;
 
-  private geometry = new THREE.PlaneGeometry(12, 9);
-  private material = new THREE.MeshStandardMaterial({ color: 0x888888 });
-  private mesh = new THREE.Mesh(this.geometry, this.material);
+  // private geometry = new THREE.PlaneGeometry(12, 9);
+  // private material = new THREE.MeshStandardMaterial({ color: 0x888888 });
+  // private mesh = new THREE.Mesh(this.geometry, this.material);
 
   constructor(public scene: THREE.Scene) {
     // this.mesh.rotation.x = -Math.PI / 2;

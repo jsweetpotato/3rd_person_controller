@@ -126,7 +126,9 @@ li {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
   background: linear-gradient(to right, #fff, #aaa);
-  -webkit-background-clip: text;
+
+  /* @ts-expect-error */
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

@@ -5,9 +5,6 @@ import { lerpAngle } from "./utils";
 import type { GLTF } from "three/examples/jsm/Addons.js";
 import { AnimationController } from "./animationController";
 
-const animationName = ["idle", "walk", "t-pose", "run"] as const;
-type AnimationName = (typeof animationName)[number];
-
 export class Player {
   private world = physicsSystem.world;
   private scene!: THREE.Scene;

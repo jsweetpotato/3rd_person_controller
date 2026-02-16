@@ -4,6 +4,7 @@ import { physicsSystem } from "./physics";
 import { Ground } from "./ground";
 import { Player } from "./player";
 import { Lights } from "./lights";
+// @ts-expect-error
 import { FBXLoader, GLTFLoader, OrbitControls } from "three/examples/jsm/Addons.js";
 import { Village } from "./village";
 import { lerpAngle } from "./utils";
@@ -113,6 +114,7 @@ class App {
       () => {
         this.renderer.setAnimationLoop(this.animate);
       },
+      // @ts-expect-error
       (url, itemsLoaded, itemsTotal) => {},
       (url) => {
         console.log(`Error loading ${url}`);
